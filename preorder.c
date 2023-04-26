@@ -1,4 +1,10 @@
-void preOrderTraversal(struct RTreeNode* node) {
+//Start at the root of the tree.
+//If the current node=leaf node, then print all the objects in that node and return.
+//If the current node=internal node, then recursively traverse each of its child nodes in order (from left to right).
+
+
+void preOrderTraversal(struct RTreeNode* node) 
+{
     if (node == NULL) {
         return;
     }
@@ -18,3 +24,4 @@ void preOrderTraversal(struct RTreeNode* node) {
         }
     }
 }
+
