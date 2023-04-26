@@ -25,7 +25,7 @@ int numChildren; // number of child nodes or objects
 int level; // level of the node in the tree (leaf nodes have level 0)
 struct RTreeNode* child_pointer[MAX_CHILDREN]; // array of child pointers for internal nodes, null for leaf nodes 
 struct DataPoint objects[MAX_CHILDREN]; // array of objects for leaf nodes
-char * tuple_identifier; // each node has a unique string tuple_identifier
+int tuple_identifier; // each node has a unique string tuple_identifier
 Rectangle mbr; // minimum bounding rectangle that bounds all objects in the node
 struct RTreeNode* parent; // pointer to the parent node
 };
@@ -36,7 +36,7 @@ struct RootNode {
 int numChildren; // number of child nodes
 struct RTreeNode * child_pointer[MAX_CHILDREN]; // array of child pointers for internal nodes
 struct DataPoint objects[MAX_CHILDREN]; // array of objects for leaf nodes
-char * tuple_identifier; // assuming we’re using something like N1, NN, LL as a tuple_identifier
+int tuple_identifier; // assuming we’re using something like N1, NN, LL as a tuple_identifier
 Rectangle mbr; // minimum bounding rectangle that bounds all objects in the tree
 };
 
@@ -51,7 +51,7 @@ struct RootNode * root;
 }RTree;
 
 RTree * createRTree() {
-  RTree * tree = (RTree*) malloc(sizeof(RTree));
+  RTree * tree = (RTree *) malloc(sizeof(RTree));
   if (tree == NULL) {
     // malloc fails to allocate memory
     printf("malloc(sizeof(RTree)) is the problem");
@@ -75,9 +75,10 @@ RTree * createRTree() {
   root->mbr.ymax = 0;
   for (int i = 0; i < MAX_CHILDREN; i++) {
     root->child_pointer[i] = NULL;
-    root->objects[i].x = root->objects[i].y = 0.0;
-    root->tuple_identifier[i] = 0;
+    root->objects[i].x = 0;
+    root->objects[i].y = 0;
   }
+  root->tuple_identifier = 0;
   tree->root = root;
 
   return tree;
@@ -85,30 +86,42 @@ RTree * createRTree() {
 int main()
 {
   //Reading data from the data.txt and storing all the points in an array called points
-  FILE *fp;
+    FILE *fp;
     fp = fopen("data.txt", "r");
     if(fp == NULL)
     {
         printf("Error opening file");
         exit(1);
     }
-    DataPoint * points = (DataPoint *)malloc(21*sizeof(struct DataPoint));
+
+    int count  = 0;
     int i=0; 
     int x, y; 
-   
-   while(fscanf(fp,"%d %d",&points->x,&points->y)!= EOF)
-    {
-      points[i].x = points->x; 
-      points[i].y = points->y; 
-      i++; 
-    }
-    fclose(fp);
+
+    while (fscanf(fp, "%d %d", &x, &y) == 2) {
+    count++;
+  }
+
+  DataPoint * points = (DataPoint *)malloc(count*sizeof(struct DataPoint));
+
+  fclose(fp);
+
+ FILE *fp2 = fopen("data.txt", "r");
+
+  for(int i = 0 ;i<count ; i++){
+      fscanf(fp, "%d %d", &points[i].x, &points[i].y);
+  }
 
     //Printing the points to check 
-    for(i=0; i<21;i++)
+    for(int j=0; j<count;j++)
     {
-      printf("x:%d,", points[i].x); 
-      printf("y:%d\n", points[i].y);
+      printf("x:%d,", points[j].x); 
+      printf("y:%d\n", points[j].y);
     }
+    
+    RTree * tree; 
+    tree = createRTree(); 
+    
     printf("Project 4"); 
+
 }
