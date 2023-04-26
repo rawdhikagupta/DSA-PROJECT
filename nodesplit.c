@@ -71,16 +71,16 @@ void splitNode(RTreeNode * N)
   {
     for(int i=0; i<c1_counter;i++)
     {
-      N1->child_pointer[i] = C1[i]; 
-      N1->numChildren++; 
+      N2->child_pointer[i] = C1[i]; 
+      N2->numChildren++; 
     }
   }
   else
   {
     for(int i=0; i<c3_counter;i++)
     {
-      N1->child_pointer[i] = C3[i]; 
-      N1->numChildren++; 
+      N2->child_pointer[i] = C3[i]; 
+      N2->numChildren++; 
     }
   }
   int index; 
