@@ -37,7 +37,6 @@ int calculateOverlap(Rectangle r1, Rectangle r2)
   // If there is overlap, calculate the total overlap
   if (x_overlap > 0 && y_overlap > 0)
   {
-    overlap += 1;
     overlap = x_overlap * y_overlap;
   }
   return overlap;
@@ -257,6 +256,12 @@ void splitNode(RTreeNode *N)
           N1->child_pointer[i] = C1[i];
           N1->numChildren++;
         }
+
+        for (int i = 0; i < c3_counter; i++)
+        {
+          N2->child_pointer[i] = C3[i];
+          N2->numChildren++;
+        }
       }
       if (totalOverlapC3 < totalOverlapC1)
       {
@@ -265,11 +270,56 @@ void splitNode(RTreeNode *N)
           N1->child_pointer[i] = C3[i];
           N1->numChildren++;
         }
+
+        for (int i = 0; i < c1_counter; i++)
+        {
+          N2->child_pointer[i] = C1[i];
+          N2->numChildren++;
+        }
       }
 
       else
       {
-        
+        int totalAreaC1 = 0.0;
+        for (int i = 0; i < c1_counter; i++)
+        {
+          totalAreaC1 += area(C1[i]->mbr);
+        }
+
+        int totalAreaC3 = 0.0;
+        for (int i = 0; i < c3_counter; i++)
+        {
+          totalAreaC3 += area(C3[i]->mbr);
+        }
+
+        if (totalAreaC1 < totalAreaC3)
+        {
+          for (int i = 0; i < c1_counter; i++)
+          {
+            N1->child_pointer[i] = C1[i];
+            N1->numChildren++;
+          }
+
+          for (int i = 0; i < c3_counter; i++)
+          {
+            N2->child_pointer[i] = C3[i];
+            N2->numChildren++;
+          }
+        }
+        else
+        {
+          for (int i = 0; i < c3_counter; i++)
+          {
+            N1->child_pointer[i] = C3[i];
+            N1->numChildren++;
+          }
+
+          for (int i = 0; i < c1_counter; i++)
+          {
+            N2->child_pointer[i] = C1[i];
+            N2->numChildren++;
+          }
+        }
       }
     }
   }
