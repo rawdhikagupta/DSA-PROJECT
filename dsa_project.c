@@ -66,7 +66,7 @@ int main()
 {
   //Reading data from the data.txt and storing all the points in an array called points
     FILE *fp;
-    fp = fopen("data.txt", "r");
+    fp = fopen("testdata.txt", "r");
     if(fp == NULL)
     {
         printf("Error opening file");
@@ -85,7 +85,7 @@ int main()
 
   fclose(fp);
 
- FILE *fp2 = fopen("data.txt", "r");
+ FILE *fp2 = fopen("testdata.txt", "r");
 
   for(int i = 0 ;i<count ; i++){
       fscanf(fp, "%d %d", &points[i].x, &points[i].y);
