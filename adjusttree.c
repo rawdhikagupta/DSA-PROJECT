@@ -4,7 +4,7 @@ void calculateMBR(RTreeNode *node)
 {
   Rectangle mbr;
 
-  if (node->level == 0)
+  if (node->numChildren == 0)
   { // Leaf node
     if (node->numObjects == 0)
     { // Empty leaf node
@@ -18,6 +18,8 @@ void calculateMBR(RTreeNode *node)
       // Initialize MBR to the first object
       mbr.xmin = node->objects[0].x;
       mbr.xmax = node->objects[0].x;
+          mbr.ymin = node->objects[0].y;
+      mbr.ymax = node->objects[0].y;
 
       // Expand MBR to include all objects in the node
       for (int i = 1; i < node->numObjects; i++)
@@ -47,7 +49,7 @@ void calculateMBR(RTreeNode *node)
     mbr = node->child_pointer[0]->mbr;
 
     // Expand MBR to include all child nodes
-    for (int i = 1; i < node->numChildren; i++)
+    for (int i = 0; i < node->numChildren; i++)
     {
       if (node->child_pointer[i]->mbr.xmin < mbr.xmin)
       {
@@ -69,8 +71,7 @@ void calculateMBR(RTreeNode *node)
   }
 
   // Update MBR of the node
-  node->mbr = mbr;
-}
+  }  node->mbr = mbr
 
 void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2)
 {

@@ -1,4 +1,5 @@
 #include "dsa_project.h"
+
 int max(int a, int b)
 {
   if (a > b)
@@ -44,7 +45,6 @@ int calculateOverlap(Rectangle r1, Rectangle r2)
   return overlap;
 }
 
-
 int calculatePointArea(DataPoint *points, int num_points)
 {
   // Initialize the minimum and maximum coordinates to the first point in the set
@@ -84,7 +84,6 @@ int calculatePointArea(DataPoint *points, int num_points)
   return area(rect);
 }
 
-
 void insertPoints(RTreeNode *N, DataPoint CN[MAX_CHILDREN], int counter)
 {
 
@@ -121,7 +120,10 @@ void splitLeaf(RTreeNode *N)
   RTreeNode *N1 = createNewNode();
   RTreeNode *N2 = createNewNode();
 
-  int c0_counter, c1_counter, c2_counter, c3_counter;
+  int c0_counter = 0;
+  int c1_counter = 0;
+  int c2_counter = 0;
+  int c3_counter = 0;
 
   for (int i = 0; i < N->numObjects; i++)
   {
@@ -197,6 +199,8 @@ void splitLeaf(RTreeNode *N)
       }
     }
   }
+
+  AdjustTree(N, N1, N2);
 }
 
 void splitNode(RTreeNode *N)
@@ -215,7 +219,10 @@ void splitNode(RTreeNode *N)
   RTreeNode *N1 = createNewNode();
   RTreeNode *N2 = createNewNode();
 
-  int c0_counter, c1_counter, c2_counter, c3_counter;
+  int c0_counter = 0;
+  int c1_counter = 0;
+  int c2_counter = 0;
+  int c3_counter = 0;
 
   for (int i = 0; i < N->numChildren; i++)
   {
@@ -309,7 +316,7 @@ void splitNode(RTreeNode *N)
         insertPointers(N1, C3, c3_counter);
       }
       // if tie break still exists choose C1 or C3 with lowest area
-      else 
+      else
       {
         int totalAreaC1 = 0.0;
         for (int i = 0; i < c1_counter; i++)
@@ -330,12 +337,12 @@ void splitNode(RTreeNode *N)
         }
         else
         {
-           insertPointers(N2, C1, c1_counter);
-        insertPointers(N1, C3, c3_counter);
+          insertPointers(N2, C1, c1_counter);
+          insertPointers(N1, C3, c3_counter);
         }
       }
     }
   }
+
+  AdjustTree(N, N1, N2);
 }
-
-
