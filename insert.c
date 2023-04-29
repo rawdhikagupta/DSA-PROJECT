@@ -50,16 +50,19 @@ int insertDataPoint(DataPoint D, RTree* T) {
     if (leaf->numObjects < MAX_OBJECTS) {
         leaf->objects[leaf->numObjects] = D;
         leaf->numObjects++;
-
         // Update MBR of node to incorporate the new DataPoint
-        if (D.x < leaf->mbr.xmin) leaf->mbr.xmin = D.x;
+        /*if (D.x < leaf->mbr.xmin) leaf->mbr.xmin = D.x;
         if (D.y < leaf->mbr.ymin) leaf->mbr.ymin = D.y;
         if (D.x > leaf->mbr.xmax) leaf->mbr.xmax = D.x;
         if (D.y > leaf->mbr.ymax) leaf->mbr.ymax = D.y;
+        */
+       calculateMBR(leaf); 
     }
+    
     // Else call splitNode
     else {
-        splitNode(leaf);
+        calculateMBR(leaf); 
+        splitLeaf(leaf);
         insertDataPoint(D, T);
     }
 

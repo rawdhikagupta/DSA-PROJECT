@@ -1,5 +1,5 @@
 //This function takes a pointer to a R-tree node as input and recursively traverses through the tree, printing the MBR values of each internal node
-
+#include "dsa_project.h"
 void printRTree(struct RTreeNode * node) {
     if (node == NULL) {
         return;
@@ -7,7 +7,7 @@ void printRTree(struct RTreeNode * node) {
     
     if (node->level == 0) { // Leaf node
         printf("Leaf Node - Objects: ");
-        for (int i = 0; i < node->numChildren; i++) {
+        for (int i = 0; i < node->numObjects; i++) {
             printf("(%d, %d) ", node->objects[i].x, node->objects[i].y);
         }
         printf("\n");

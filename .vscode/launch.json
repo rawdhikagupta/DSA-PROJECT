@@ -7,7 +7,7 @@
       "request": "launch",
       "args": [],
       "cwd": "/Users/radhikagupta/DSA-PROJECT",
-      "program": "/Users/radhikagupta/DSA-PROJECT/dsa_project"
+      "program": "/Users/radhikagupta/DSA-PROJECT/build/Debug/outDebug"
     }
   ]
 }

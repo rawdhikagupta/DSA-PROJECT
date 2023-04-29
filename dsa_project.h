@@ -1,6 +1,6 @@
 #ifndef DSA_PROJECT_H
 #define DSA_PROJECT_H
-
+#include <stdio.h>
 #define MAX_CHILDREN 4
 #define MAX_OBJECTS 4
 
@@ -56,5 +56,11 @@ struct RTreeNode * root;
 } RTree;
 
 int area(Rectangle R);
-
+RTreeNode * createNewNode(); 
+void splitNode(RTreeNode *N);
+void splitLeaf(RTreeNode *N);
+int insertDataPoint(DataPoint D, RTree* T); 
+void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2); 
+void printRTree(struct RTreeNode * node);
+void calculateMBR(RTreeNode *node);
 #endif

@@ -1,54 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define MAX_CHILDREN 4
-
+#include "dsa_project.h"
 //`struct Rectangle:` to store The minimum bound rectangle 
-
-typedef struct Rectangle {
-int xmin; // minimum x-coordinate
-int ymin; // minimum y-coordinate
-int xmax; // maximum x-coordinate
-int ymax; // maximum y-coordinate
-}Rectangle;
-
-//`struct DataPoint:`
-
-typedef struct DataPoint {
-int x; // x-coordinate of the data point
-int y; // y-coordinate of the data point
-}DataPoint;
-
-//`struct RTreeNode`: A structure to store a node of the R-tree, which contains either objects or other nodes.In our case, an object is basically a two dimensional data point. 
-
-struct RTreeNode {
-int numChildren; // number of child nodes or objects
-int level; // level of the node in the tree (leaf nodes have level 0)
-struct RTreeNode* child_pointer[MAX_CHILDREN]; // array of child pointers for internal nodes, null for leaf nodes 
-struct DataPoint objects[MAX_CHILDREN]; // array of objects for leaf nodes
-int tuple_identifier; // each node has a unique string tuple_identifier
-Rectangle mbr; // minimum bounding rectangle that bounds all objects in the node
-struct RTreeNode* parent; // pointer to the parent node
-};
-
-//`struct RootNode`: A structure to store the root node of the R-tree, which contains all the objects in the tree.
-
-struct RootNode {
-int numChildren; // number of child nodes
-struct RTreeNode * child_pointer[MAX_CHILDREN]; // array of child pointers for internal nodes
-struct DataPoint objects[MAX_CHILDREN]; // array of objects for leaf nodes
-int tuple_identifier; // assuming we’re using something like N1, NN, LL as a tuple_identifier
-Rectangle mbr; // minimum bounding rectangle that bounds all objects in the tree
-};
-
-//so basically the root node has the minimum bounded rectangle and address of the child nodes, so it has to have a rectangle, a pointer array to a rtree nodes (pointers to all its children saved in an array). 
-
-//`struct RTree:` 
-
-typedef struct RTree {
-int numNodes; //Number of total nodes in the tree 
-int height;   //The height of the tree 
-struct RootNode * root;
-}RTree;
 
 RTree * createRTree() {
   RTree * tree = (RTree *) malloc(sizeof(RTree));
@@ -61,7 +15,7 @@ RTree * createRTree() {
   tree->height = 0; 
 
   // initialize the root node
-  struct RootNode * root = (struct RootNode*) malloc(sizeof(struct RootNode));
+  struct RTreeNode * root = (struct RTreeNode*) malloc(sizeof(struct RTreeNode));
   if (root == NULL) {
     // malloc fails to allocate memory
     printf("malloc(sizeof(RootNode)) is the problem");
@@ -83,6 +37,31 @@ RTree * createRTree() {
 
   return tree;
 }
+
+RTreeNode * createNewNode()
+{
+  struct RTreeNode * newnode = (struct RTreeNode*) malloc(sizeof(struct RTreeNode));
+  if (newnode == NULL) {
+    // malloc fails to allocate memory
+    printf("malloc(sizeof(RTreeNode)) is the problem");
+    return NULL;
+  }
+  newnode->numChildren = 0;
+  newnode->numObjects = 0; 
+  newnode->mbr.xmin = 0;
+  newnode->mbr.ymin = 0;
+  newnode->mbr.xmax = 0;
+  newnode->mbr.ymax = 0;
+  for (int i = 0; i < MAX_CHILDREN; i++) {
+    newnode->child_pointer[i] = NULL;
+    newnode->objects[i].x = 0;
+    newnode->objects[i].y = 0;
+  }
+  newnode->tuple_identifier = 0;
+
+  return newnode;
+}
+
 int main()
 {
   //Reading data from the data.txt and storing all the points in an array called points
@@ -113,15 +92,20 @@ int main()
   }
 
     //Printing the points to check 
-    for(int j=0; j<count;j++)
+    /*for(int j=0; j<count;j++)
     {
       printf("x:%d,", points[j].x); 
       printf("y:%d\n", points[j].y);
-    }
+    }*/
     
     RTree * tree; 
     tree = createRTree(); 
+    insertDataPoint(points[0], tree);
+    insertDataPoint(points[1], tree);
+    insertDataPoint(points[2], tree);
+    insertDataPoint(points[3], tree);
     
+    printRTree(tree->root); 
     printf("Project 4"); 
 
 }
