@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include "dsa_project.h"
+
 
 void calculateMBR(RTreeNode *node)
 {
@@ -18,7 +20,7 @@ void calculateMBR(RTreeNode *node)
       // Initialize MBR to the first object
       mbr.xmin = node->objects[0].x;
       mbr.xmax = node->objects[0].x;
-          mbr.ymin = node->objects[0].y;
+      mbr.ymin = node->objects[0].y;
       mbr.ymax = node->objects[0].y;
 
       // Expand MBR to include all objects in the node
@@ -51,11 +53,11 @@ void calculateMBR(RTreeNode *node)
     // Expand MBR to include all child nodes
     for (int i = 0; i < node->numChildren; i++)
     {
-      if (node->child_pointer[i]->mbr.xmin < mbr.xmin)
+      if (node->child_pointer[i]->mbr.xmin <= mbr.xmin)
       {
         mbr.xmin = node->child_pointer[i]->mbr.xmin;
       }
-      if (node->child_pointer[i]->mbr.ymin < mbr.ymin)
+      if (node->child_pointer[i]->mbr.ymin <= mbr.ymin)
       {
         mbr.ymin = node->child_pointer[i]->mbr.ymin;
       }
@@ -71,46 +73,56 @@ void calculateMBR(RTreeNode *node)
   }
 
   // Update MBR of the node
-  }  node->mbr = mbr
-
-void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2)
+  node->mbr = mbr;
+}
+void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2, RTree *T)
 {
-
-  int index;
-  // for loop to find the index of current node that is being split
-  for (int i = 0; i < N->parent->numChildren; i++)
+  if (N->parent != NULL)
   {
+    int index;
+    // for loop to find the index of current node that is being split
+    for (int i = 0; i < N->parent->numChildren; i++)
+    {
 
-    if (N->parent->child_pointer[i]->tuple_identifier == N->tuple_identifier)
-    {
-      index = i;
-      break;
+      if (N->parent->child_pointer[i]->tuple_identifier == N->tuple_identifier)
+      {
+        index = i;
+        break;
+      }
     }
-    else
+    N->parent->numChildren++;
+    // include the new nodes in the child pointers of the parent
+    for (int j = N->parent->numChildren - 1; j > index; j--)
     {
-      printf("Node not found \n");
+      N->parent->child_pointer[j + 1] = N->parent->child_pointer[j];
+    }
+
+    // set the new child pointers in the parent node
+    N->parent->child_pointer[index] = N1;
+    N1->parent = N->parent;
+    N->parent->child_pointer[index + 1] = N2;
+    N2->parent = N->parent;
+    N->parent = NULL;
+
+    calculateMBR(N1);
+    calculateMBR(N2);
+    calculateMBR(N1->parent);
+
+    if (N1->parent->numChildren > MAX_CHILDREN)
+    {
+      splitNode(N1->parent, T);
     }
   }
-  N->parent->numChildren++;
-  // include the new nodes in the child pointers of the parent
-  for (int j = N->parent->numChildren - 1; j > index; j--)
+
+  else
   {
-    N->parent->child_pointer[j + 1] = N->parent->child_pointer[j];
-  }
-
-  // set the new child pointers in the parent node
-  N->parent->child_pointer[index] = N1;
-  N1->parent = N->parent;
-  N->parent->child_pointer[index + 1] = N2;
-  N2->parent = N->parent;
-  N->parent = NULL;
-
-  calculateMBR(N1);
-  calculateMBR(N2);
-  calculateMBR(N1->parent);
-
-  if (N1->parent->numChildren > MAX_CHILDREN)
-  {
-    splitNode(N1->parent);
+    RTreeNode *newroot = createNewNode(T);
+    newroot->child_pointer[0] = N;
+    newroot->numChildren++;
+    calculateMBR(newroot); // let 0 be the tuple identifier for root
+    N->parent = newroot;
+    T->root = newroot;
+    AdjustTree(N,N1,N2,T);
+    printf("Leaf successfully split");
   }
 }

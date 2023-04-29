@@ -1,4 +1,5 @@
 #include "dsa_project.h"
+#include <stdio.h>
 
 int max(int a, int b)
 {
@@ -104,11 +105,12 @@ void insertPointers(RTreeNode *N, RTreeNode *CN[MAX_CHILDREN], int counter)
   }
 }
 
-void splitLeaf(RTreeNode *N)
+void splitLeaf(RTreeNode *N, RTree *T)
 {
 
   int x_cen = (N->mbr.xmin + N->mbr.xmax) / 2;
   int y_cen = (N->mbr.ymin + N->mbr.ymax) / 2;
+  printf("%d %d \n", x_cen, y_cen);
 
   // Splitting the mbr's in the four corners
   DataPoint C0[MAX_CHILDREN];
@@ -117,8 +119,8 @@ void splitLeaf(RTreeNode *N)
   DataPoint C3[MAX_CHILDREN];
 
   // Creating two new nodes
-  RTreeNode *N1 = createNewNode();
-  RTreeNode *N2 = createNewNode();
+  RTreeNode *N1 = createNewNode(T);
+  RTreeNode *N2 = createNewNode(T);
 
   int c0_counter = 0;
   int c1_counter = 0;
@@ -127,7 +129,7 @@ void splitLeaf(RTreeNode *N)
 
   for (int i = 0; i < N->numObjects; i++)
   {
-    Rectangle r = N->child_pointer[i]->mbr;
+
     int x_obj = N->objects[i].x;
     int y_obj = N->objects[i].y;
 
@@ -185,29 +187,19 @@ void splitLeaf(RTreeNode *N)
     else
     {
       // calculate total area of C1 points and C3 points and move least area ones , we dont need overlap here as the MBR area of data points is 0
-      int totalAreaC1 = calculatePointArea(C1, c1_counter);
-      int totalAreaC3 = calculatePointArea(C3, c3_counter);
-      if (totalAreaC1 < totalAreaC3)
-      {
-        insertPoints(N2, C3, c3_counter);
-        insertPoints(N1, C1, c1_counter);
-      }
-      else
-      {
-        insertPoints(N2, C1, c1_counter);
-        insertPoints(N1, C3, c3_counter);
-      }
+      // edge case not given in the paper 
     }
   }
 
-  AdjustTree(N, N1, N2);
+  AdjustTree(N, N1, N2, T);
 }
 
-void splitNode(RTreeNode *N)
+void splitNode(RTreeNode *N, RTree *T)
 {
 
   int x_cen = (N->mbr.xmin + N->mbr.xmax) / 2;
   int y_cen = (N->mbr.ymin + N->mbr.ymax) / 2;
+  printf("%d %d \n", x_cen, y_cen);
 
   // Splitting the mbr's in the four corners
   RTreeNode *C0[MAX_CHILDREN];
@@ -216,8 +208,8 @@ void splitNode(RTreeNode *N)
   RTreeNode *C3[MAX_CHILDREN];
 
   // Creating two new nodes
-  RTreeNode *N1 = createNewNode();
-  RTreeNode *N2 = createNewNode();
+  RTreeNode *N1 = createNewNode(T);
+  RTreeNode *N2 = createNewNode(T);
 
   int c0_counter = 0;
   int c1_counter = 0;
@@ -315,7 +307,7 @@ void splitNode(RTreeNode *N)
         insertPointers(N2, C1, c1_counter);
         insertPointers(N1, C3, c3_counter);
       }
-      // if tie break still exists choose C1 or C3 with lowest area
+
       else
       {
         int totalAreaC1 = 0.0;
@@ -343,6 +335,5 @@ void splitNode(RTreeNode *N)
       }
     }
   }
-
-  AdjustTree(N, N1, N2);
+  AdjustTree(N, N1, N2, T);
 }

@@ -4,19 +4,22 @@
 #include "dsa_project.h"
 //`struct Rectangle:` to store The minimum bound rectangle 
 
-RTree * createRTree() {
-  RTree * tree = (RTree *) malloc(sizeof(RTree));
-  if (tree == NULL) {
+RTree *createRTree()
+{
+  RTree *tree = (RTree *)malloc(sizeof(RTree));
+  if (tree == NULL)
+  {
     // malloc fails to allocate memory
     printf("malloc(sizeof(RTree)) is the problem");
     return NULL;
   }
-  tree->numNodes = 0; 
-  tree->height = 0; 
+  tree->numNodes = 0;
+  tree->height = 0;
 
   // initialize the root node
-  struct RTreeNode * root = (struct RTreeNode*) malloc(sizeof(struct RTreeNode));
-  if (root == NULL) {
+  struct RTreeNode *root = (struct RTreeNode *)malloc(sizeof(struct RTreeNode));
+  if (root == NULL)
+  {
     // malloc fails to allocate memory
     printf("malloc(sizeof(RootNode)) is the problem");
     free(tree);
@@ -27,7 +30,8 @@ RTree * createRTree() {
   root->mbr.ymin = 0;
   root->mbr.xmax = 0;
   root->mbr.ymax = 0;
-  for (int i = 0; i < MAX_CHILDREN; i++) {
+  for (int i = 0; i < MAX_CHILDREN; i++)
+  {
     root->child_pointer[i] = NULL;
     root->objects[i].x = 0;
     root->objects[i].y = 0;
@@ -38,74 +42,78 @@ RTree * createRTree() {
   return tree;
 }
 
-RTreeNode * createNewNode()
+
+RTreeNode *createNewNode(RTree *T)
 {
-  struct RTreeNode * newnode = (struct RTreeNode*) malloc(sizeof(struct RTreeNode));
-  if (newnode == NULL) {
+
+  RTreeNode *newnode = (RTreeNode *)malloc(sizeof(struct RTreeNode));
+  if (newnode == NULL)
+  {
     // malloc fails to allocate memory
     printf("malloc(sizeof(RTreeNode)) is the problem");
     return NULL;
   }
+  T->height++;
   newnode->numChildren = 0;
-  newnode->numObjects = 0; 
-  newnode->mbr.xmin = 0;
-  newnode->mbr.ymin = 0;
-  newnode->mbr.xmax = 0;
-  newnode->mbr.ymax = 0;
+  newnode->numObjects = 0;
+  newnode->tuple_identifier = T->numNodes++;
   for (int i = 0; i < MAX_CHILDREN; i++) {
     newnode->child_pointer[i] = NULL;
-    newnode->objects[i].x = 0;
-    newnode->objects[i].y = 0;
   }
-  newnode->tuple_identifier = 0;
-
+  newnode->parent = NULL;
   return newnode;
 }
 
 int main()
 {
-  //Reading data from the data.txt and storing all the points in an array called points
-    FILE *fp;
-    fp = fopen("testdata.txt", "r");
-    if(fp == NULL)
-    {
-        printf("Error opening file");
-        exit(1);
-    }
+  // Reading data from the data.txt and storing all the points in an array called points
+  FILE *fp;
+  fp = fopen("data.txt", "r");
+  if (fp == NULL)
+  {
+    printf("Error opening file");
+    exit(1);
+  }
 
-    int count  = 0;
-    int i=0; 
-    int x, y; 
+  int count = 0;
+  int i = 0;
+  int x, y;
 
-    while (fscanf(fp, "%d %d", &x, &y) == 2) {
+  while (fscanf(fp, "%d %d", &x, &y) == 2)
+  {
     count++;
   }
 
-  DataPoint * points = (DataPoint *)malloc(count*sizeof(struct DataPoint));
+  DataPoint *points = (DataPoint *)malloc(count * sizeof(struct DataPoint));
 
   fclose(fp);
 
- FILE *fp2 = fopen("testdata.txt", "r");
+  FILE *fp2 = fopen("data.txt", "r");
 
-  for(int i = 0 ;i<count ; i++){
-      fscanf(fp, "%d %d", &points[i].x, &points[i].y);
+  for (int i = 0; i < count; i++)
+  {
+    fscanf(fp, "%d %d", &points[i].x, &points[i].y);
   }
 
-    //Printing the points to check 
-    /*for(int j=0; j<count;j++)
-    {
-      printf("x:%d,", points[j].x); 
-      printf("y:%d\n", points[j].y);
-    }*/
-    
-    RTree * tree; 
-    tree = createRTree(); 
-    insertDataPoint(points[0], tree);
-    insertDataPoint(points[1], tree);
-    insertDataPoint(points[2], tree);
-    insertDataPoint(points[3], tree);
-    
-    printRTree(tree->root); 
-    printf("Project 4"); 
+  // Printing the points to check
+  for (int j = 0; j < count; j++)
+  {
+    printf("x:%d,", points[j].x);
+    printf("y:%d\n", points[j].y);
+  }
+  printf("\n");
 
+  RTree *tree;
+  tree = createRTree();
+  RTreeNode *N = createNewNode(tree);
+  tree->root = N;
+  for (int i = 0; i < count; i++)
+  {
+    insertDataPoint(points[i], tree);
+  }
+  printf("\n");
+  printRTree(tree->root);
+  printf("\n%d", tree->root->numChildren);
+  printf(" end of tree printing\n");
+  printf("Project 4");
 }
