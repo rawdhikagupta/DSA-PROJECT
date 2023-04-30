@@ -42,7 +42,6 @@ RTree *createRTree()
   return tree;
 }
 
-
 RTreeNode *createNewNode(RTree *T)
 {
 
@@ -53,16 +52,13 @@ RTreeNode *createNewNode(RTree *T)
     printf("malloc(sizeof(RTreeNode)) is the problem");
     return NULL;
   }
-  T->height++;
   newnode->numChildren = 0;
   newnode->numObjects = 0;
   newnode->tuple_identifier = T->numNodes++;
-  for (int i = 0; i < MAX_CHILDREN; i++) {
-    newnode->child_pointer[i] = NULL;
-  }
   newnode->parent = NULL;
   return newnode;
 }
+
 
 int main()
 {
@@ -92,15 +88,15 @@ int main()
 
   for (int i = 0; i < count; i++)
   {
-    fscanf(fp, "%d %d", &points[i].x, &points[i].y);
+    fscanf(fp2, "%d %d", &points[i].x, &points[i].y);
   }
 
   // Printing the points to check
-  for (int j = 0; j < count; j++)
+  /*for (int j = 0; j < count; j++)
   {
     printf("x:%d,", points[j].x);
     printf("y:%d\n", points[j].y);
-  }
+  }*/
   printf("\n");
 
   RTree *tree;
@@ -113,7 +109,8 @@ int main()
   }
   printf("\n");
   printRTree(tree->root);
-  printf("\n%d", tree->root->numChildren);
-  printf(" end of tree printing\n");
-  printf("Project 4");
+  //printf("\n%d", tree->root->numChildren);
+  printf("End of tree printing\n");
+  //printf("Project 4");
+
 }

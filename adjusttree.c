@@ -1,22 +1,19 @@
-#include <stdio.h>
 #include "dsa_project.h"
-
-
 void calculateMBR(RTreeNode *node)
 {
+  if (node == NULL) {
+    return;
+  }
+
   Rectangle mbr;
 
-  if (node->numChildren == 0)
-  { // Leaf node
-    if (node->numObjects == 0)
-    { // Empty leaf node
-      mbr.xmin = 0;
-      mbr.ymin = 0;
-      mbr.xmax = 0;
-      mbr.ymax = 0;
-    }
-    else
-    {
+  if (node->numChildren == 0) { // Leaf node
+    if (node->numObjects == 0) { // Empty leaf node
+      mbr.xmin = INT_MAX;
+      mbr.ymin = INT_MAX;
+      mbr.xmax = INT_MIN;
+      mbr.ymax = INT_MIN;
+    } else {
       // Initialize MBR to the first object
       mbr.xmin = node->objects[0].x;
       mbr.xmax = node->objects[0].x;
@@ -24,49 +21,37 @@ void calculateMBR(RTreeNode *node)
       mbr.ymax = node->objects[0].y;
 
       // Expand MBR to include all objects in the node
-      for (int i = 1; i < node->numObjects; i++)
-      {
-        if (node->objects[i].x <= mbr.xmin)
-        {
+      for (int i = 1; i < node->numObjects; i++) {
+        if (node->objects[i].x <= mbr.xmin) {
           mbr.xmin = node->objects[i].x;
         }
-        if (node->objects[i].y <= mbr.ymin)
-        {
+        if (node->objects[i].y <= mbr.ymin) {
           mbr.ymin = node->objects[i].y;
         }
-        if (node->objects[i].x > mbr.xmax)
-        {
+        if (node->objects[i].x > mbr.xmax) {
           mbr.xmax = node->objects[i].x;
         }
-        if (node->objects[i].y > mbr.ymax)
-        {
+        if (node->objects[i].y > mbr.ymax) {
           mbr.ymax = node->objects[i].y;
         }
       }
     }
-  }
-  else
-  { // Internal node
+  } else { // Internal node
     // Initialize MBR to the first child
     mbr = node->child_pointer[0]->mbr;
 
     // Expand MBR to include all child nodes
-    for (int i = 0; i < node->numChildren; i++)
-    {
-      if (node->child_pointer[i]->mbr.xmin <= mbr.xmin)
-      {
+    for (int i = 0; i < node->numChildren; i++) {
+      if (node->child_pointer[i]->mbr.xmin < mbr.xmin) {
         mbr.xmin = node->child_pointer[i]->mbr.xmin;
       }
-      if (node->child_pointer[i]->mbr.ymin <= mbr.ymin)
-      {
+      if (node->child_pointer[i]->mbr.ymin < mbr.ymin) {
         mbr.ymin = node->child_pointer[i]->mbr.ymin;
       }
-      if (node->child_pointer[i]->mbr.xmax > mbr.xmax)
-      {
+      if (node->child_pointer[i]->mbr.xmax > mbr.xmax) {
         mbr.xmax = node->child_pointer[i]->mbr.xmax;
       }
-      if (node->child_pointer[i]->mbr.ymax > mbr.ymax)
-      {
+      if (node->child_pointer[i]->mbr.ymax > mbr.ymax) {
         mbr.ymax = node->child_pointer[i]->mbr.ymax;
       }
     }
@@ -74,6 +59,13 @@ void calculateMBR(RTreeNode *node)
 
   // Update MBR of the node
   node->mbr = mbr;
+}
+void adjustMBRs(RTreeNode *node) {
+    RTreeNode *current = node;
+    while (current != NULL) {
+        calculateMBR(current);
+        current = current->parent;
+    }
 }
 void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2, RTree *T)
 {
@@ -92,9 +84,9 @@ void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2, RTree *T)
     }
     N->parent->numChildren++;
     // include the new nodes in the child pointers of the parent
-    for (int j = N->parent->numChildren - 1; j > index; j--)
+    for (int j = N->parent->numChildren-1; j > index; j--)
     {
-      N->parent->child_pointer[j + 1] = N->parent->child_pointer[j];
+      N->parent->child_pointer[j+1] = N->parent->child_pointer[j];
     }
 
     // set the new child pointers in the parent node
@@ -103,14 +95,16 @@ void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2, RTree *T)
     N->parent->child_pointer[index + 1] = N2;
     N2->parent = N->parent;
     N->parent = NULL;
+    N = NULL;
+    
+    RTreeNode *NN = N1->parent;
+    adjustMBRs(N1);
+    adjustMBRs(N2);
 
-    calculateMBR(N1);
-    calculateMBR(N2);
-    calculateMBR(N1->parent);
-
-    if (N1->parent->numChildren > MAX_CHILDREN)
+    // Update MBR of node to incorporate the new DataPoint
+    if (N2->parent->numChildren > MAX_CHILDREN)
     {
-      splitNode(N1->parent, T);
+      splitNode(N2->parent, T);
     }
   }
 
@@ -119,10 +113,10 @@ void AdjustTree(RTreeNode *N, RTreeNode *N1, RTreeNode *N2, RTree *T)
     RTreeNode *newroot = createNewNode(T);
     newroot->child_pointer[0] = N;
     newroot->numChildren++;
-    calculateMBR(newroot); // let 0 be the tuple identifier for root
+    calculateMBR(newroot); 
     N->parent = newroot;
     T->root = newroot;
     AdjustTree(N,N1,N2,T);
-    printf("Leaf successfully split");
+    
   }
 }

@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/radhikagupta/DSA-PROJECT",
-      "program": "/Users/radhikagupta/DSA-PROJECT/build/Debug/outDebug"
+      "cwd": "/Users/radhikagupta/Dowloads",
+      "program": "/Users/radhikagupta/Downloads/code"
     }
   ]
 }

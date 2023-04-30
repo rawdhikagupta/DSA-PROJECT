@@ -58,35 +58,19 @@ int insertDataPoint(DataPoint D, RTree *T)
   // Call chooseLeaf to find the F in which D can be placed
   RTreeNode *leaf = chooseLeaf(D, T->root);
 
-  // If F has space -> place D
+  // Update MBR of node to incorporate the new DataPoint
+  leaf->objects[leaf->numObjects] = D;
+  leaf->numObjects++;
+  adjustMBRs(leaf);
+
+  // If leaf node has space -> place D
   if (leaf->numObjects < MAX_OBJECTS)
   {
-    leaf->objects[leaf->numObjects] = D;
-    leaf->numObjects++;
-
-    // Update MBR of node to incorporate the new DataPoint
-    if (D.x < leaf->mbr.xmin)
-      leaf->mbr.xmin = D.x;
-    if (D.y < leaf->mbr.ymin)
-      leaf->mbr.ymin = D.y;
-    if (D.x > leaf->mbr.xmax)
-      leaf->mbr.xmax = D.x;
-    if (D.y > leaf->mbr.ymax)
-      leaf->mbr.ymax = D.y;
-    
-    if(leaf->parent!=NULL){
-      calculateMBR(leaf->parent);
-    }
-      
+    return 1; // Successful insertion
   }
 
   // Else call splitNode
-  else
-  {
-    splitLeaf(leaf, T);
-    insertDataPoint(D, T);
-  }
-
+  splitLeaf(leaf, T);
   // Adjust tree to reflect the changes in upper levels
 
   // If the adjustment process leads to root F split, then create a new root F

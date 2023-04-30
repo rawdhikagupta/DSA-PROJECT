@@ -85,23 +85,22 @@ int calculatePointArea(DataPoint *points, int num_points)
   return area(rect);
 }
 
-void insertPoints(RTreeNode *N, DataPoint CN[MAX_CHILDREN], int counter)
+
+void insertPoints(RTreeNode *N, DataPoint CN[], int counter)
 {
 
   for (int i = 0; i < counter; i++)
   {
-    N->objects[i] = CN[i];
-    N->numObjects++;
+    N->objects[N->numObjects++] = CN[i];
   }
 }
 
-void insertPointers(RTreeNode *N, RTreeNode *CN[MAX_CHILDREN], int counter)
+void insertPointers(RTreeNode *N, RTreeNode *CN[], int counter)
 {
 
   for (int i = 0; i < counter; i++)
   {
-    N->child_pointer[i] = CN[i];
-    N->numChildren++;
+    N->child_pointer[N->numChildren++] = CN[i];
   }
 }
 
@@ -110,7 +109,6 @@ void splitLeaf(RTreeNode *N, RTree *T)
 
   int x_cen = (N->mbr.xmin + N->mbr.xmax) / 2;
   int y_cen = (N->mbr.ymin + N->mbr.ymax) / 2;
-  printf("%d %d \n", x_cen, y_cen);
 
   // Splitting the mbr's in the four corners
   DataPoint C0[MAX_CHILDREN];
@@ -119,8 +117,10 @@ void splitLeaf(RTreeNode *N, RTree *T)
   DataPoint C3[MAX_CHILDREN];
 
   // Creating two new nodes
+  T->numNodes--;
   RTreeNode *N1 = createNewNode(T);
   RTreeNode *N2 = createNewNode(T);
+  
 
   int c0_counter = 0;
   int c1_counter = 0;
@@ -187,7 +187,19 @@ void splitLeaf(RTreeNode *N, RTree *T)
     else
     {
       // calculate total area of C1 points and C3 points and move least area ones , we dont need overlap here as the MBR area of data points is 0
-      // edge case not given in the paper 
+      // not sure about this as it is not given in the paper
+      int totalAreaC1 = calculatePointArea(C1, c1_counter);
+      int totalAreaC3 = calculatePointArea(C3, c3_counter);
+      if (totalAreaC1 < totalAreaC3)
+      {
+        insertPoints(N2, C3, c3_counter);
+        insertPoints(N1, C1, c1_counter);
+      }
+      else
+      {
+        insertPoints(N2, C1, c1_counter);
+        insertPoints(N1, C3, c3_counter);
+      }
     }
   }
 
@@ -199,7 +211,6 @@ void splitNode(RTreeNode *N, RTree *T)
 
   int x_cen = (N->mbr.xmin + N->mbr.xmax) / 2;
   int y_cen = (N->mbr.ymin + N->mbr.ymax) / 2;
-  printf("%d %d \n", x_cen, y_cen);
 
   // Splitting the mbr's in the four corners
   RTreeNode *C0[MAX_CHILDREN];
@@ -208,8 +219,10 @@ void splitNode(RTreeNode *N, RTree *T)
   RTreeNode *C3[MAX_CHILDREN];
 
   // Creating two new nodes
+   T->numNodes --;
   RTreeNode *N1 = createNewNode(T);
   RTreeNode *N2 = createNewNode(T);
+ 
 
   int c0_counter = 0;
   int c1_counter = 0;
