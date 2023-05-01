@@ -171,36 +171,16 @@ void splitLeaf(RTreeNode *N, RTree *T)
     insertPoints(N1, C2, c2_counter);
     insertPoints(N2, C0, c0_counter);
   }
-  if (c1_counter > c3_counter)
+  // arbitrarily distribute points for leaf
+  if (c1_counter >= c3_counter)
   {
     insertPoints(N2, C1, c1_counter);
     insertPoints(N1, C3, c3_counter);
   }
   else
   {
-    if (c3_counter > c1_counter)
-    {
       insertPoints(N2, C3, c3_counter);
       insertPoints(N1, C1, c1_counter);
-    }
-
-    else
-    {
-      // calculate total area of C1 points and C3 points and move least area ones , we dont need overlap here as the MBR area of data points is 0
-      // not sure about this as it is not given in the paper
-      int totalAreaC1 = calculatePointArea(C1, c1_counter);
-      int totalAreaC3 = calculatePointArea(C3, c3_counter);
-      if (totalAreaC1 < totalAreaC3)
-      {
-        insertPoints(N2, C3, c3_counter);
-        insertPoints(N1, C1, c1_counter);
-      }
-      else
-      {
-        insertPoints(N2, C1, c1_counter);
-        insertPoints(N1, C3, c3_counter);
-      }
-    }
   }
 
   AdjustTree(N, N1, N2, T);
@@ -295,7 +275,7 @@ void splitNode(RTreeNode *N, RTree *T)
       {
         for (int j = 0; j < N1->numChildren; j++)
         {
-          totalOverlapC1 += calculateOverlap(C1[i]->mbr, N1->child_pointer[i]->mbr);
+          totalOverlapC1 += calculateOverlap(C1[i]->mbr, N1->child_pointer[j]->mbr);
         }
       }
 
@@ -305,7 +285,7 @@ void splitNode(RTreeNode *N, RTree *T)
       {
         for (int j = 0; j < N1->numChildren; j++)
         {
-          totalOverlapC3 += calculateOverlap(C3[i]->mbr, N1->child_pointer[i]->mbr);
+          totalOverlapC3 += calculateOverlap(C3[i]->mbr, N1->child_pointer[j]->mbr);
         }
       }
 
