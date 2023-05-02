@@ -1,6 +1,6 @@
 //This function takes a pointer to a R-tree node as input and recursively traverses through the tree, printing the MBR values of each internal node
 #include "dsa_project.h"
-void printRTree(struct RTreeNode *node)
+void preOrderPrintRTree(struct RTreeNode *node)
 {
   if (node == NULL)
   {
