@@ -1,27 +1,68 @@
-//Start at the root of the tree.
-//If the current node=leaf node, then print all the objects in that node and return.
-//If the current node=internal node, then recursively traverse each of its child nodes in order (from left to right).
+#include "dsa_project.h"
 
+void checkSubTree(struct RTreeNode *node) {
 
-void preOrderTraversal(struct RTreeNode* node) 
-{
-    if (node == NULL) {
-        return;
-    }
-    if (node->numChildren == 0) {
-        // The current node is a leaf node, print all the objects in it.
-        for (int i = 0; i < MAX_CHILDREN; i++) {
-            if (node->objects[i].x != 0 && node->objects[i].y != 0) {
-                printf("(%d,%d) ", node->objects[i].x, node->objects[i].y);
+    //check if the node lies in left subtree or right subtree
+    int xcenter, parent_xcenter = 0;
+
+    if (node->numChildren > 0)
+    {
+        int xcenter = (node->mbr.xmin + node->mbr.xmax) / 2;
+        int parent_xcenter = (node->parent->mbr.xmin + node->parent->mbr.xmax) / 2;
+
+            if (parent_xcenter > xcenter) // Node is in left subtree
+            {
+                for (int i = 0; i < node->numChildren; i++)
+                {
+                    preorderRTree(node->child_pointer[i]);
+                }
             }
-        }
-        return;
-    }
-    // The current node is an internal node, recursively traverse each of its child nodes.
-    for (int i = 0; i < MAX_CHILDREN; i++) {
-        if (node->child_pointer[i] != NULL) {
-            preOrderTraversal(node->child_pointer[i]);
-        }
-    }
+            else // Node is in right subtree
+                {
+                    for (int i = 0; i < node->numChildren; i++)
+                {
+                    preorderRTree(node->child_pointer[i]);
+                }
+                }
 }
+
+void preOrderTraversal(struct RTreeNode *node) {
+
+//check if current node is NULL
+    if (node == NULL)
+        {
+            return;
+        }
+
+//print root node
+    if(node->parent == NULL) 
+    {
+        printf("RootNode - MBR: {(%d, %d), (%d, %d)}\n", node->mbr.xmin, node->mbr.ymin, node->mbr.xmax, node->mbr.ymax);
+    }
+    else if (node->numChildren == 0)
+    { // Leaf node
+        printf("Leaf Node - Objects: ");
+        for (int i = 0; i < node->numObjects; i++)
+            {
+                printf("(%d, %d) ", node->objects[i].x, node->objects[i].y);
+            }
+    printf("\n");
+    }
+    else if
+    { // Internal node
+        if(node->parent!=NULL)
+    {
+            printf("\nInternal Node - MBR: {(%d, %d), (%d, %d)}\n", node->mbr.xmin, node->mbr.ymin, node->mbr.xmax, node->mbr.ymax);
+            for (int i = 0; i < node->numChildren; i++)
+        {
+            printRTree(node->child_pointer[i]);
+        }
+   }
+
+
+}
+}
+
+
+
 
