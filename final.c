@@ -47,7 +47,6 @@ RTreeNode* createNewNode(RTree* tree) {
     node->numChildren = 0;
     node->numObjects = 0;
     node->tuple_identifier = identifier++;
-    printf("NEW NODE WITH IDENTIFIER: %d\n", identifier - 1);
     node->parent = NULL;
     tree->numNodes++;
     
@@ -214,7 +213,6 @@ void insertNodes(RTreeNode* parent, RTreeNode* nodes[], int counter) {
         parent->children[parent->numChildren] = nodes[i];
         nodes[i]->parent = parent;
         parent->numChildren++;
-        printf("node %d has %d children\n", parent->tuple_identifier, parent->numChildren);
     }
 }
 
@@ -227,7 +225,6 @@ DataPoint centre(Rectangle rect) {
 }
 
 void transferNodes(RTreeNode* full, RTreeNode* vacant, int split, int horAxis) {
-    printf("Transfering nodes...\n");
     int index = 0;
     int minDistance = distanceBetweenPointAndAxis(horAxis, split, centre(full->children[0]->mbr));
     for (int i = 1; i < MAX_CHILDREN; i++) {
@@ -244,6 +241,7 @@ void transferNodes(RTreeNode* full, RTreeNode* vacant, int split, int horAxis) {
     full->numChildren--;
     // shift rest of the nodes into the null space
     for (int i = index; i < MAX_CHILDREN - 1; i++) full->children[i] = full->children[i + 1];
+    full->children[MAX_CHILDREN - 1] = NULL;
 }
 
 long calculateOverlap(Rectangle r1, Rectangle r2) {
@@ -316,24 +314,20 @@ void splitNode(RTreeNode* node, RTreeNode* child, RTree* tree) {
     int horAxis = 0;
 
     if (c0_counter > c2_counter) {
-        printf("c0count %d > c2count N1: %d N2: %d\n", c0_counter, N1->tuple_identifier, N2->tuple_identifier);
         insertNodes(N1, C0, c0_counter);
         insertNodes(N2, C2, c2_counter);
     } else {
-        printf("c0count < c2count N1: %d N2: %d\n", N1->tuple_identifier, N2->tuple_identifier);
         insertNodes(N2, C0, c0_counter);
         insertNodes(N1, C2, c2_counter);
     }
 
     if (c1_counter > c3_counter) {
-        printf("1\n");
         insertNodes(N2, C1, c1_counter);
         insertNodes(N1, C3, c3_counter);
         if (c0_counter > c2_counter) horAxis = 1;
         else horAxis = 0;
     } else {
         if (c1_counter < c3_counter) {
-            printf("2\n");
             insertNodes(N1, C1, c1_counter);
             insertNodes(N2, C3, c3_counter);
             if (c0_counter > c2_counter) horAxis = 0;
@@ -357,7 +351,6 @@ void splitNode(RTreeNode* node, RTreeNode* child, RTree* tree) {
 
             // Choose group of objects with least total overlap
             if (totalOverlapC1 < totalOverlapC3) {
-                printf("3\n");
                 insertNodes(N1, C1, c1_counter);
                 insertNodes(N2, C3, c3_counter);
                 if (c0_counter > c2_counter) horAxis = 0;
@@ -365,7 +358,6 @@ void splitNode(RTreeNode* node, RTreeNode* child, RTree* tree) {
             }
             
             if (totalOverlapC3 < totalOverlapC1) {
-                printf("4\n");
                 insertNodes(N2, C1, c1_counter);
                 insertNodes(N1, C3, c3_counter);
                 if (c0_counter > c2_counter) horAxis = 1;
@@ -382,13 +374,11 @@ void splitNode(RTreeNode* node, RTreeNode* child, RTree* tree) {
                 }
 
                 if (totalAreaC1 < totalAreaC3) {
-                    printf("5\n");
                     insertNodes(N1, C1, c1_counter);
                     insertNodes(N2, C3, c3_counter);
                     if (c0_counter > c2_counter) horAxis = 0;
                     else horAxis = 1;
                 } else {
-                    printf("6\n");
                     insertNodes(N2, C1, c1_counter);
                     insertNodes(N1, C3, c3_counter);
                     if (c0_counter > c2_counter) horAxis = 1;
@@ -417,7 +407,6 @@ void splitNode(RTreeNode* node, RTreeNode* child, RTree* tree) {
         newRoot->numChildren = 2;
         tree->root = newRoot;
         tree->height++;
-        //tree->numNodes += 2;
         free(node);
         return;
     }
@@ -433,7 +422,6 @@ void splitNode(RTreeNode* node, RTreeNode* child, RTree* tree) {
     free(node);
 
     if (parent->numChildren == MAX_CHILDREN) {
-        printf("Need splitting on parent %d...\n", parent->tuple_identifier);
         splitNode(parent, N2, tree);
         return;
     }
@@ -465,19 +453,15 @@ void transferPoints(RTreeNode* full, RTreeNode* vacant, int split, int horAxis) 
     full->numObjects--;
     // shift the rest of the pointers
     for (int i = index; i < MAX_OBJECTS - 1; i++) full->objects[i] = full->objects[i + 1];
-    
+    full->objects[MAX_OBJECTS - 1] = NULL;
 }
 
 void splitLeaf(RTreeNode* leaf, DataPoint* point, RTree* tree) {
 
-    //printf("xmin %ld ymin %ld xmax %ld ymax %ld\n", leaf->mbr.xmin, leaf->mbr.ymin, leaf->mbr.xmax, leaf->mbr.ymax);
     long x_cen = (leaf->mbr.xmin + leaf->mbr.xmax) / 2;
     long y_cen = (leaf->mbr.ymin + leaf->mbr.ymax) / 2;
-    //printf("xcen %ld ycen %ld\n", x_cen, y_cen);
 
     RTreeNode* parent = leaf->parent;
-    //if (tree->height != 0) printf("parent: %d", parent->tuple_identifier);
-    //printf("parent initialised...\n");
     tree->numNodes--;
 
     RTreeNode* L1 = createNewNode(tree);
@@ -486,7 +470,6 @@ void splitLeaf(RTreeNode* leaf, DataPoint* point, RTree* tree) {
     RTreeNode* L2 = createNewNode(tree);
     L2->parent = parent;
     L2->level = 0;
-    //printf("L1 and L2 created successfully...\n");
 
     DataPoint* C0[MAX_OBJECTS];
     DataPoint* C1[MAX_OBJECTS];
@@ -504,34 +487,27 @@ void splitLeaf(RTreeNode* leaf, DataPoint* point, RTree* tree) {
 
     for (int i = 0; i < MAX_OBJECTS + 1; i++) {
 
-        //printf("(%d, %d)\n", temp[i]->x, temp[i]->y);
-
         long x_obj = temp[i]->x;
         long y_obj = temp[i]->y;
 
-        if (x_obj > x_cen) {
-            if (y_obj > y_cen) {
-                //printf("Added to C2...\n");
+        if (x_obj >= x_cen) {
+            if (y_obj >= y_cen && c2_counter < 4) {
                 C2[c2_counter] = temp[i];
                 c2_counter++;
-            } else {
-                //printf("Added to C3...\n");
+            } else if (y_obj <= y_cen && c3_counter < 4) {
                 C3[c3_counter] = temp[i];
                 c3_counter++;
             }
         } else {
-            if (y_obj > y_cen) {
-                //printf("Added to C1...\n");
+            if (y_obj >= y_cen && c1_counter < 4) {
                 C1[c1_counter] = temp[i];
                 c1_counter++;
-            } else {
-                //printf("Added to C0...\n");
+            } else if (y_obj <= y_cen && c0_counter < 4) {
                 C0[c0_counter] = temp[i];
                 c0_counter++;
             }
         }
     }
-    //printf("Points distributed among corners...\n");
 
     // If split is along horizontal axis then 1 else 0
     int horAxis = 0;
@@ -555,8 +531,6 @@ void splitLeaf(RTreeNode* leaf, DataPoint* point, RTree* tree) {
         if (c0_counter > c2_counter) horAxis = 0;
         else horAxis = 1;
     }
-
-    //printf("Points inserted in L1 and L2...\n");
 
     int split_axis = horAxis? y_cen: x_cen;
 
@@ -602,16 +576,12 @@ void splitLeaf(RTreeNode* leaf, DataPoint* point, RTree* tree) {
     free(leaf);
 
     if (parent->numChildren == MAX_CHILDREN) {
-        printf("splitNode function called...on parent %d with child %d\n", parent->tuple_identifier, L2->tuple_identifier);
         splitNode(parent, L2, tree);
         adjustTree(L2);
         adjustTree(L1);
-        //printf("returned\n");
         return;
     }
     
-    //printf("parent tuple %d  parent numchildren  %d\n", parent->tuple_identifier, parent->numChildren);
-    printf("parent %d numchildren increasing...\n", parent->tuple_identifier);
     parent->children[parent->numChildren] = L2;
     parent->numChildren++;
     adjustTree(L2);
@@ -621,10 +591,7 @@ void insertDataPoint(DataPoint* point, RTree* tree) {
 
     RTreeNode* leaf = chooseLeaf(point, tree);
 
-    printf("Adding (%ld, %ld) to leaf %d\n", point->x, point->y, leaf->tuple_identifier);
-
     if (leaf->numObjects == MAX_OBJECTS) {
-        printf("splitLeaf function called on %d...\n", leaf->tuple_identifier);
         splitLeaf(leaf, point, tree);
         return;
     }
@@ -634,28 +601,6 @@ void insertDataPoint(DataPoint* point, RTree* tree) {
     adjustTree(leaf);
 }
 
-/*void printTree(RTreeNode* node) {
-
-    if (node == NULL) return;
-
-    // Traverse the tree in the form of preorder traversal and print
-
-    if (node->level == 0) {
-        // it's a leaf node
-        // print all objects in the leaf
-        printf("leaf %d MBR: %d\t", node->tuple_identifier, area(node->mbr));
-        for (int i = 0; i < node->numObjects; i++) printf("(%d, %d)  ", node->objects[i]->x, node->objects[i]->y); 
-        printf("\n");
-        return;
-    }
-
-    // it's an internal node
-    for (int i = 0; i < node->numChildren; i++) {
-        printf("node %d MBR: %d\n", node->tuple_identifier, area(node->mbr));
-        printTree(node->children[i]);
-    }
-}*/
-
 void printTree(RTreeNode* node) {
     if (node == NULL)
     {
@@ -664,7 +609,6 @@ void printTree(RTreeNode* node) {
 
     if (node->numChildren == 0)
     { // Leaf node
-        printf("Leaf Node %d - Objects: ", node->tuple_identifier);
         for (int i = 0; i < node->numObjects; i++)
         {
         printf("(%ld, %ld) ", node->objects[i]->x, node->objects[i]->y);
@@ -674,13 +618,11 @@ void printTree(RTreeNode* node) {
     else
     { // Internal node
     if(node->parent!=NULL) {
-        printf("\nInternal Node %d - MBR: %ld\n", node->tuple_identifier, area(node->mbr));
         for (int i = 0; i < node->numChildren; i++)
         {
             printTree(node->children[i]);
         }
     } else if(node->parent == NULL) {
-        printf("RootNode %d - MBR: %ld\n", node->tuple_identifier, area(node->mbr));
         for (int i = 0; i < node->numChildren; i++)
         {
         printTree(node->children[i]);
@@ -692,7 +634,6 @@ void printTree(RTreeNode* node) {
 void freeNodes(RTreeNode* node) {
     
     if (node->level == 0) {
-        //printf("Freeing a leaf %d\n", node->tuple_identifier);
         for (int i = 0; i < node->numObjects; i++) free(node->objects[i]);
         free(node);
         return;
@@ -700,7 +641,6 @@ void freeNodes(RTreeNode* node) {
 
 
     for (int i = 0; i < node->numChildren; i++) {
-        //printf("Freeing child nodes of %d\n", node->tuple_identifier);
         freeNodes(node->children[i]); 
     }
 }
@@ -709,6 +649,40 @@ void freeTree(RTree* tree) {
     // free all the dynamically allocated memory
     freeNodes(tree->root);
     free(tree);
+}
+
+int search(struct RTreeNode* node, Rectangle s)
+{
+    if (node->numChildren == 0)
+    {
+        // Check each entry in the leaf node
+       
+            // Check for overlap
+            if (calculateOverlap(node->mbr, s) == 1)
+            {
+                return 1;
+            } 
+            else 
+            {
+            return 0;
+            }
+        
+    }
+    else
+    {
+        // Check each entry in the non-leaf node
+        for (int i = 0; i < node->numChildren; i++)
+        {
+            // Check for overlap
+            if (calculateOverlap(node->children[i]->mbr, s) == 1)
+            {
+                // Recurse on the child node
+               return search(node->children[i], s);
+            }
+        }
+    }
+
+    return 0;
 }
 
 int main() {
@@ -725,7 +699,6 @@ int main() {
     int i = 0;
 
     while (fscanf(fp, "%ld %ld", &x, &y) == 2) {
-        //printf("within loop %d\t", i);
 
         DataPoint* point = (DataPoint*) malloc (sizeof(DataPoint));
 
@@ -738,9 +711,6 @@ int main() {
         point->y = y;
         
         insertDataPoint(point, tree);
-        //printTree(tree->root);
-        //printf("---------------------------\n");
-        printf("This is the %d point\n", i);
         i++;
     }
 
