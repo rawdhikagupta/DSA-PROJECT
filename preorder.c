@@ -14,14 +14,14 @@ void checkSubTree(struct RTreeNode *node) {
             {
                 for (int i = 0; i < node->numChildren; i++)
                 {
-                    preorderRTree(node->child_pointer[i]);
+                    preorderTraversalnode->child_pointer[i]);
                 }
             }
             else // Node is in right subtree
                 {
                     for (int i = 0; i < node->numChildren; i++)
                 {
-                    preorderRTree(node->child_pointer[i]);
+                    preorderTraversal(node->child_pointer[i]);
                 }
                 }
 }
