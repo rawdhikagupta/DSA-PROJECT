@@ -1,18 +1,21 @@
 #include "dsa_project.h"
 
-void search(RTreeNode* node, DataPoint D)
+int search(struct RTreeNode* node, Rectangle s)
 {
-    if (node->isLeaf)
+    if (node->numChildren == 0)
     {
         // Check each entry in the leaf node
-        for (int i = 0; i < node->numObjects; i++)
-        {
+       
             // Check for overlap
-            if (calculateOverlap(node->objects[i].mbr, D.mbr) > 0)
+            if (calculateOverlap(node->mbr, s) == 1)
             {
-                printf("Object area: %d\n", calculatePointArea(node->objects[i].points, node->objects[i].numPoints));
+                return 1;
+            } 
+            else 
+            {
+                return 0;
             }
-        }
+        
     }
     else
     {
@@ -20,12 +23,11 @@ void search(RTreeNode* node, DataPoint D)
         for (int i = 0; i < node->numChildren; i++)
         {
             // Check for overlap
-            if (calculateOverlap(node->child_pointer[i]->mbr, D.mbr) > 0)
+            if (calculateOverlap(node->child_pointer[i]->mbr, s) == 1)
             {
                 // Recurse on the child node
-                search(node->child_pointer[i], D);
+                search(node->child_pointer[i], s);
             }
         }
     }
 }
-
