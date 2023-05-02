@@ -665,7 +665,7 @@ int search(struct RTreeNode* node, Rectangle s)
         // Check each entry in the leaf node
        
             // Check for overlap
-            if (calculateOverlap(node->mbr, s) == 1)
+            if (calculateOverlap(node->mbr, s) > 0)
             {
                 return 1;
             } 
