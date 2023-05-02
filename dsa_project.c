@@ -108,7 +108,7 @@ int main()
     insertDataPoint(points[i], tree);
   }
   printf("\n");
-  printRTree(tree->root);
+  preOrderPrintRTree(tree->root);
   //printf("\n%d", tree->root->numChildren);
   printf("End of tree printing\n");
   //printf("Project 4");
